@@ -9,8 +9,8 @@ type Data []models.Task
 
 var Tasks Data
 
-func (d *Data) GetTasks() ([]models.Task, error) {
-	return Tasks, nil
+func (d *Data) GetTasks() []models.Task {
+	return Tasks
 }
 
 func (d *Data) GetTaskById(id int) (*models.Task, error) {
@@ -23,7 +23,8 @@ func (d *Data) GetTaskById(id int) (*models.Task, error) {
 }
 
 func (d *Data) AddTask(task *models.Task) error {
-	task.ID += 1
+	id := len(Tasks) + 1
+	task.ID = id
 
 	Tasks = append(Tasks, *task)
 	return nil
@@ -46,8 +47,9 @@ func (d *Data) DeleteTask(id int) error {
 			index = i
 			break
 		}
+		index = -1
 	}
-	if index == 0 {
+	if index == -1 {
 		return errors.New("id not found")
 	}
 
