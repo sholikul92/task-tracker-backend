@@ -6,7 +6,7 @@ import (
 )
 
 type TaskRepository interface {
-	GetTasks() ([]models.Task, error)
+	GetTasks() []models.Task
 	GetTaskById(id int) (*models.Task, error)
 	AddTask(task *models.Task) error
 	EditTask(id int, task *models.Task) error
@@ -17,24 +17,22 @@ type taskRepo struct {
 	db db.Data
 }
 
-func newTaskRepository(db db.Data) *taskRepo {
+func NewTaskRepository(db db.Data) *taskRepo {
 	return &taskRepo{
 		db: db,
 	}
 }
 
-func (t *taskRepo) GetTasks() ([]models.Task, error) {
-	tasks, err := t.db.GetTasks()
-	if err != nil {
-		return nil, err
-	}
-	return tasks, nil
+func (t *taskRepo) GetTasks() []models.Task {
+	tasks := t.db.GetTasks()
+
+	return tasks
 }
 
 func (t *taskRepo) GetTaskById(id int) (*models.Task, error) {
 	task, err := t.db.GetTaskById(id)
 	if err != nil {
-		return &models.Task{}, nil
+		return &models.Task{}, err
 	}
 
 	return task, nil
