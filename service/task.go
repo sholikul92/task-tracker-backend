@@ -24,17 +24,39 @@ func newTaskService(repo repository.TaskRepository) *taskService {
 }
 
 func (s *taskService) GetTasks() ([]models.Task, error) {
-	return nil, nil
+	tasks, err := s.repo.GetTasks()
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
 }
+
 func (s *taskService) GetTaskById(id int) (*models.Task, error) {
-	return nil, nil
+	task, err := s.repo.GetTaskById(id)
+	if err != nil {
+		return &models.Task{}, nil
+	}
+
+	return task, nil
 }
+
 func (s *taskService) AddTask(task *models.Task) error {
+	if err := s.repo.AddTask(task); err != nil {
+		return err
+	}
 	return nil
 }
+
 func (s *taskService) EditTask(id int, task *models.Task) error {
+	if err := s.repo.EditTask(id, task); err != nil {
+		return err
+	}
 	return nil
 }
+
 func (s *taskService) DeleteTask(id int) error {
+	if err := s.repo.DeleteTask(id); err != nil {
+		return err
+	}
 	return nil
 }
