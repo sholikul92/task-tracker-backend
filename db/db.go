@@ -38,6 +38,7 @@ func (d *Data) EditTask(id int, task *models.Task) error {
 		return fmt.Errorf("Task with id %d not found", id)
 	}
 
+	task.ID = Tasks[taskIndex].ID
 	Tasks[taskIndex] = *task
 	return nil
 }
