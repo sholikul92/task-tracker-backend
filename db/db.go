@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"fmt"
 	"task-tracker/models"
 )
 
@@ -31,28 +32,36 @@ func (d *Data) AddTask(task *models.Task) error {
 }
 
 func (d *Data) EditTask(id int, task *models.Task) error {
-	taskFound, err := d.GetTaskById(id)
-	if err != nil {
-		return err
+	taskIndex := d.findTaskIndex(id)
+
+	if taskIndex == -1 {
+		return fmt.Errorf("Task with id %d not found", id)
 	}
 
-	*taskFound = *task
+	Tasks[taskIndex] = *task
 	return nil
 }
 
 func (d *Data) DeleteTask(id int) error {
-	var index int
-	for i, task := range Tasks {
-		if task.ID == id {
-			index = i
-			break
-		}
-		index = -1
-	}
-	if index == -1 {
+	taskIndex := d.findTaskIndex(id)
+
+	if taskIndex == -1 {
 		return errors.New("id not found")
 	}
 
-	Tasks = append(Tasks[:index], Tasks[index+1:]...)
+	Tasks = append(Tasks[:taskIndex], Tasks[taskIndex+1:]...)
 	return nil
+}
+
+func (d *Data) findTaskIndex(id int) int {
+	var indexTask int
+	for i, task := range Tasks {
+		if task.ID == id {
+			indexTask = i
+			break
+		}
+		indexTask = -1
+	}
+
+	return indexTask
 }
