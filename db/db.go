@@ -55,14 +55,11 @@ func (d *Data) DeleteTask(id int) error {
 }
 
 func (d *Data) findTaskIndex(id int) int {
-	var indexTask int
 	for i, task := range Tasks {
 		if task.ID == id {
-			indexTask = i
-			break
+			return i
 		}
-		indexTask = -1
 	}
 
-	return indexTask
+	return -1
 }
