@@ -6,16 +6,20 @@ import (
 	"task-tracker/models"
 )
 
-type Data []models.Task
-
-var Tasks Data
+type Data struct {
+	TaskList []models.Task
+}
 
 func (d *Data) GetTasks() []models.Task {
-	return Tasks
+	if d.TaskList == nil {
+		d.TaskList = []models.Task{}
+	}
+
+	return d.TaskList
 }
 
 func (d *Data) GetTaskById(id int) (*models.Task, error) {
-	for _, task := range Tasks {
+	for _, task := range d.TaskList {
 		if task.ID == id {
 			return &task, nil
 		}
@@ -24,10 +28,10 @@ func (d *Data) GetTaskById(id int) (*models.Task, error) {
 }
 
 func (d *Data) AddTask(task *models.Task) error {
-	id := len(Tasks) + 1
+	id := len(d.TaskList) + 1
 	task.ID = id
 
-	Tasks = append(Tasks, *task)
+	d.TaskList = append(d.TaskList, *task)
 	return nil
 }
 
@@ -38,8 +42,8 @@ func (d *Data) EditTask(id int, task *models.Task) error {
 		return fmt.Errorf("Task with id %d not found", id)
 	}
 
-	task.ID = Tasks[taskIndex].ID
-	Tasks[taskIndex] = *task
+	task.ID = d.TaskList[taskIndex].ID
+	d.TaskList[taskIndex] = *task
 	return nil
 }
 
@@ -50,12 +54,12 @@ func (d *Data) DeleteTask(id int) error {
 		return errors.New("id not found")
 	}
 
-	Tasks = append(Tasks[:taskIndex], Tasks[taskIndex+1:]...)
+	d.TaskList = append(d.TaskList[:taskIndex], d.TaskList[taskIndex+1:]...)
 	return nil
 }
 
 func (d *Data) findTaskIndex(id int) int {
-	for i, task := range Tasks {
+	for i, task := range d.TaskList {
 		if task.ID == id {
 			return i
 		}
