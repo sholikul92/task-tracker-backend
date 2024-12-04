@@ -1,12 +1,13 @@
 package repository
 
 import (
-	"task-tracker/db"
 	"task-tracker/models"
+
+	"gorm.io/gorm"
 )
 
 type TaskRepository interface {
-	GetTasks() []models.Task
+	GetTasks() ([]models.Task, error)
 	GetTaskById(id int) (*models.Task, error)
 	AddTask(task *models.Task) error
 	EditTask(id int, task *models.Task) error
@@ -14,46 +15,48 @@ type TaskRepository interface {
 }
 
 type taskRepo struct {
-	db db.Data
+	db *gorm.DB
 }
 
-func NewTaskRepository(db db.Data) *taskRepo {
-	return &taskRepo{
-		db: db,
+func NewTaskRepository(db *gorm.DB) *taskRepo {
+	return &taskRepo{db}
+}
+
+func (t *taskRepo) GetTasks() ([]models.Task, error) {
+	var tasks []models.Task
+	if err := t.db.Find(&tasks).Error; err != nil {
+		return nil, err
 	}
-}
 
-func (t *taskRepo) GetTasks() []models.Task {
-	tasks := t.db.GetTasks()
-
-	return tasks
+	return tasks, nil
 }
 
 func (t *taskRepo) GetTaskById(id int) (*models.Task, error) {
-	task, err := t.db.GetTaskById(id)
+	var task models.Task
+	err := t.db.First(&task).Where("ID = ?", id).Error
 	if err != nil {
 		return &models.Task{}, err
 	}
 
-	return task, nil
+	return &task, nil
 }
 
 func (t *taskRepo) AddTask(task *models.Task) error {
-	if err := t.db.AddTask(task); err != nil {
+	if err := t.db.Create(&task).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (t *taskRepo) EditTask(id int, task *models.Task) error {
-	if err := t.db.EditTask(id, task); err != nil {
+	if err := t.db.Where("ID = ?", id).Save(&task).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (t *taskRepo) DeleteTask(id int) error {
-	if err := t.db.DeleteTask(id); err != nil {
+	if err := t.db.Delete(&models.Task{}, id).Error; err != nil {
 		return err
 	}
 	return nil
