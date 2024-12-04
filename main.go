@@ -3,44 +3,54 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"task-tracker/db"
-	"task-tracker/handler"
-	"task-tracker/repository"
-	"task-tracker/service"
+	"task-tracker/models"
+	"task-tracker/router"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	router := SetupRouter()
+	dbConfig, err := LoadConfigFromEnv()
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := db.SetupDB(dbConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := db.AutoMigrate(&models.Task{}); err != nil {
+		panic(err)
+	}
+
+	router := router.SetupRouter(db)
 
 	fmt.Println("Server runing in http://localhost:8080")
 	log.Fatal(router.Run(":8080"))
 }
 
-func SetupRouter() *gin.Engine {
-	r := gin.Default()
-
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // Ganti sesuai origin frontend
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		AllowCredentials: true, // Jika menggunakan cookies atau auth
-	}))
-
-	repo := repository.NewTaskRepository(db.Data{})
-	service := service.NewTaskService(repo)
-	handler := handler.NewTaskHandler(service)
-
-	task := r.Group("task")
-	{
-		task.POST("/add", handler.AddTask)
-		task.GET("/", handler.GetTasks)
-		task.GET("/:id", handler.GetTaskById)
-		task.PUT("/edit/:id", handler.EditTask)
-		task.DELETE("/delete/:id", handler.DeleteTask)
+func LoadConfigFromEnv() (*models.DBConfig, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
 	}
 
-	return r
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		return nil, err
+	}
+
+	dbconfig := models.DBConfig{
+		HOST:     os.Getenv("DB_HOST"),
+		PORT:     port,
+		USER:     os.Getenv("DB_USER"),
+		PASSWORD: os.Getenv("DB_PASSWORD"),
+		DBNAME:   os.Getenv("DB_NAME"),
+	}
+
+	return &dbconfig, nil
 }
