@@ -15,7 +15,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
@@ -31,6 +31,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		task.GET("/:id", handler.GetTaskById)
 		task.PUT("/edit/:id", handler.EditTask)
 		task.DELETE("/delete/:id", handler.DeleteTask)
+		task.PATCH("/update-status/:id", handler.UpdateStatus)
 	}
 
 	return r
