@@ -11,6 +11,7 @@ type TaskService interface {
 	AddTask(task *models.Task) error
 	EditTask(id int, task *models.Task) error
 	DeleteTask(id int) error
+	UpdateStatusTask(id int, status bool) error
 }
 
 type taskService struct {
@@ -56,6 +57,17 @@ func (s *taskService) EditTask(id int, task *models.Task) error {
 
 func (s *taskService) DeleteTask(id int) error {
 	if err := s.repo.DeleteTask(id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *taskService) UpdateStatusTask(id int, status bool) error {
+	if _, err := s.repo.GetTaskById(id); err != nil {
+		return err
+	}
+
+	if err := s.repo.UpdateStatusCompleted(id, status); err != nil {
 		return err
 	}
 	return nil
