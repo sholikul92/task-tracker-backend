@@ -16,6 +16,7 @@ type TaskHandler interface {
 	AddTask(c *gin.Context)
 	EditTask(c *gin.Context)
 	DeleteTask(c *gin.Context)
+	UpdateStatus(c *gin.Context)
 }
 
 type taskHandler struct {
@@ -127,4 +128,28 @@ func (h *taskHandler) DeleteTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "delete task success",
 	})
+}
+
+func (h *taskHandler) UpdateStatus(c *gin.Context) {
+	idParam := c.Param("id")
+	statusStr := c.Query("status")
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	status, err := strconv.ParseBool(statusStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.service.UpdateStatusTask(id, status); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "update status task success"})
 }
