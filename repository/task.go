@@ -12,6 +12,7 @@ type TaskRepository interface {
 	AddTask(task *models.Task) error
 	EditTask(id int, task *models.Task) error
 	DeleteTask(id int) error
+	UpdateStatusCompleted(id int, status bool) error
 }
 
 type taskRepo struct {
@@ -33,7 +34,7 @@ func (t *taskRepo) GetTasks() ([]models.Task, error) {
 
 func (t *taskRepo) GetTaskById(id int) (*models.Task, error) {
 	var task models.Task
-	err := t.db.First(&task).Where("ID = ?", id).Error
+	err := t.db.Where("id = ?", id).First(&task).Error
 	if err != nil {
 		return &models.Task{}, err
 	}
@@ -59,5 +60,13 @@ func (t *taskRepo) DeleteTask(id int) error {
 	if err := t.db.Delete(&models.Task{}, id).Error; err != nil {
 		return err
 	}
+	return nil
+}
+
+func (t *taskRepo) UpdateStatusCompleted(id int, status bool) error {
+	if err := t.db.Table("tasks").Where("ID = ?", id).Update("completed", status).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
