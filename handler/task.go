@@ -29,7 +29,10 @@ func NewTaskHandler(s service.TaskService) *taskHandler {
 }
 
 func (h *taskHandler) GetTasks(c *gin.Context) {
-	tasks := h.service.GetTasks()
+	tasks, err := h.service.GetTasks()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+	}
 	c.JSON(http.StatusOK, tasks)
 }
 func (h *taskHandler) GetTaskById(c *gin.Context) {
