@@ -25,7 +25,7 @@ func NewTaskRepository(db *gorm.DB) *taskRepo {
 
 func (t *taskRepo) GetTasks() ([]models.Task, error) {
 	var tasks []models.Task
-	if err := t.db.Find(&tasks).Error; err != nil {
+	if err := t.db.Find(&tasks).Order("ID ASC").Error; err != nil {
 		return nil, err
 	}
 
